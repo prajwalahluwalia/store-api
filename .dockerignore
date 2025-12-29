@@ -1,0 +1,8 @@
+# Exclude instance folder from build context so it isn't copied into the image
+instance
+instance/
+
+# Common noise
+__pycache__
+*.pyc
+.pytest_cache
