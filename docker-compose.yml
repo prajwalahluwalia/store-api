@@ -1,4 +1,4 @@
-service "db" is not runningservices:
+services:
   web:
     build: .
     ports:
@@ -10,7 +10,7 @@ service "db" is not runningservices:
     env_file:
       - ./.env
   db:
-    image: postgres
+    image: postgres:13
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: store_db
