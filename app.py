@@ -7,6 +7,7 @@ import uuid
 from db import db
 import models
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
 from resources.store import blp as StoreBlueprint
 from resources.item import blp as ItemBlueprint
@@ -31,6 +32,10 @@ def create_app(db_url = None):
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "283823725663015969875534793613892856925")  
     jwt = JWTManager(app)
 
+    @jwt.needs_fresh_token_loader
+    def token_not_fresh_callback(jwt_header, jwt_payload):
+        return jsonify({"message": "The token is not fresh.", "error": "fresh_token_required"}), 401
+        
     @jwt.token_in_blocklist_loader
     def check_if_token_in_blocklist(jwt_header, jwt_payload):
         return jwt_payload["jti"] in BLOCKLIST
@@ -38,7 +43,7 @@ def create_app(db_url = None):
     @jwt.revoked_token_loader
     def revoked_token_callback(jwt_header, jwt_payload):
         return jsonify({"message": "The token has been revoked.", "error": "token_revoked"}), 401
-        
+
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity):
         if identity == "1":
@@ -58,9 +63,10 @@ def create_app(db_url = None):
         return jsonify({"message": "Request does not contain an access token.", "error": "authorization_required"}), 401
     
     db.init_app(app)
+    migrate = Migrate(app, db)
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
         
     api = Api(app)
 

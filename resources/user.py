@@ -109,4 +109,7 @@ class TokenRefresh(MethodView):
     def post(self):
         current_user = get_jwt()["sub"]
         new_token = create_access_token(identity=current_user, fresh=False)
+        # to create one non fresh token
+        # jti = get_jwt()["jti"]
+        # BLOCKLIST.add(jti)
         return {"access_token": new_token}, 200
